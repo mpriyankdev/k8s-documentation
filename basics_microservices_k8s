@@ -1,0 +1,10 @@
+1. deply the queue. [activemq]
+2. deploy the position simulator. - sends the messages/position details to the queue.
+   No need for service definition as it doesnt exposes itself.
+3. deploy the position tracker.
+4. deploy the api-gateway. for testing we can expose the NodePort and then after testing we can remove as we dont want to expose the api-gateway. We will be exposing the frontend to the external world.
+5. deploy the frontend.
+
+using mongo with the position-tracker.
+
+

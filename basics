@@ -1,0 +1,170 @@
+minikube docker-env
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://127.0.0.1:59054"
+export DOCKER_CERT_PATH="C:\Users\mpriy\.minikube\certs"
+export MINIKUBE_ACTIVE_DOCKERD="minikube"
+
+# To point your shell to minikube's docker-daemon, run:
+# eval $(minikube -p minikube docker-env)
+
+mpriy@mpriyank MINGW64 ~
+$ eval $(minikube docker-env)
+
+mpriy@mpriyank MINGW64 ~
+$ echo $DOCKER_HOST
+tcp://127.0.0.1:59054
+
+------------------
+minikube ip
+--------------------
+PODS : Group of one or more containers.
+Wrapper for a container.
+
+Running a pod : 
+kubectl get all
+
+kubectl apply -f first-pod.yaml
+
+kubectl describe pod webapp
+
+execute command against a pod : 
+kubectl exec webapp ls
+
+kubectl -it exec webapp sh
+
+minikube service fleetman-webapp
+minikube service fleetman-queue
+
+===================================================
+SERVICES: connect to k8s cluster.
+long running object.
+stable fixed port.
+attach services to port.
+pod can have labels , then we can have selector to select.
+
+NodePort and ClusterIp and LoadBalancer
+ClusterIP : only be accessible from inside the cluster.[internal service]
+NodePort : exposed to outside world. >30000
+
+Use this to access the pod using the newly created service :
+minikube service fleetman-webapp
+
+We can make use of labels extensively to select the pods.
+Can manage deployments without any downtime.
+
+kubectl get pods --show-labels //displaying pod with labels info as well
+kubectl get pods --show-labels -l release=0  //for filtering
+
+==========================================================
+ReplicaSets : 
+In the template section provide the pod definition.
+
+kubectl delete pod webapp-release-0-5
+
+Extra set of configs for k8s.
+
+kubectl delete pods --all
+
+eg:
+$ kubectl describe replicaset webapp
+Name:         webapp
+Namespace:    default
+Selector:     app=webapp
+Labels:       <none>
+Annotations:  <none>
+Replicas:     1 current / 1 desired
+Pods Status:  1 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=webapp
+  Containers:
+   webapp:
+    Image:        richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From                   Message
+  ----    ------            ----  ----                   -------
+  Normal  SuccessfulCreate  116s  replicaset-controller  Created pod: webapp-n7khm
+
+
+kubectl delete replicaset webapp
+
+==========================================================
+DEPLOYMENTS:
+rs + rolling updates = deployments
+capability of rollbacks.
+
+Deployment will in turn create the replicaset.which will manage the number of pods.
+
+kubectl apply -f pods.yaml  [it already has deployment yaml ]
+
+kubectl rollout status deploy webapp
+
+kubectl rollout history deploy webapp
+
+kubectl rollout undo deploy webapp --to-revision={}
+
+=====================================================
+NETWORKING AND SERVICE-DISCOVERY:
+
+kube-dns : db containing key-value. keys are labels and value as ip addresses.
+
+present in kube-system namespace.
+ns : partitioning resources accross the system.
+
+kubectl get namespaces
+$ kubectl get namespaces
+NAME                   STATUS   AGE
+default                Active   16h
+kube-node-lease        Active   16h
+kube-public            Active   16h
+kube-system            Active   16h
+kubernetes-dashboard   Active   16h
+
+every k8s resource is already configured with the nameserver which already knows where to resolve the services from.
+
+cat /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+
+
+FQDN[full qualified domain names]
+eg : database.default.svc.cluster.local
+     database.<namespace-name>.svc.cluster.local
+
+minikube stop
+minikube delete
+delete dirs ~/.minikube or ~/.kube
+minikube start --memory 4096
+
+=======================================================
+
+Inspecting pod logs : 
+kubectl logs <pod-name>
+kubectl logs -f <pod-name>  [follow the logs]
+
+========================================================
+VOLUME MOUNTS:
+
+PersistentVolumes and PersistentVolumeClaims
+
+PersistentVolumeClaims : pointer to the configuration of how we want the mount to be implemented.
+
+
+StorageClasses and Bindings:
+
+storageClassName : to setup different classes of storage.
+Allows different type of storage to have a label, which can be used later for the Quality of service.
+eg : label based on capacity.[HDD or SSD]
+
+PVC links to PV using storageClassName.
+Binding will be done at runtime to match the PVC with the matching PersistentVolume.
+
+
+
+
+

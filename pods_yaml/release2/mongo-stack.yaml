@@ -1,0 +1,72 @@
+# #mongodb-deployment
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: mongodb
+# spec:
+#   selector:
+#     matchLabels:
+#       app: mongodb
+#   replicas:
+#   template:
+#     metadata:
+#       labels:
+#         app: mongodb
+#     spec:
+#       containers:
+#       - name: mongodb
+#         image: mongo:3.6.5-jessie
+#         #here we just define that we want the mount in this container.More volume related def. will be outside.
+#         volumeMounts:
+#           - name: mongo-persistent-storage
+#             mountPath: /data/db
+#       # this is volume info outside the container.
+#       volumes:
+#         - name: mongo-persistent-storage
+#           hostPath: 
+#             path: /tmp/priyank/
+#             type: DirectoryOrCreate #check the documentation for other options.
+---
+#using persistent volume claim
+
+#mongodb-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas:
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:3.6.5-jessie
+        #here we just define that we want the mount in this container.More volume related def. will be outside.
+        volumeMounts:
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+      # this is volume info outside the container.
+      volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc #details in the other file. storage.yaml
+
+---
+#mongodb-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - name: mongoport
+    port: 27017
+  type: ClusterIP
